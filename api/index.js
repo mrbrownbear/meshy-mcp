@@ -21,7 +21,7 @@ import {
 const json = (res, status, data) => res.status(status).setHeader('Cache-Control','no-store').json(data);
 const fail = (res, status, error, description) => json(res, status, {error, error_description: description});
 const originError = 'Invalid OAuth configuration';
-const scopeDefault = 'meshy:read meshy:generate';
+const scopeDefault = 'meshy:read meshy:generate offline_access';
 
 function addHeaders(res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -50,7 +50,7 @@ function authorizeParameters(p, cfg) {
   const resource = asString(p.resource) || cfg.resource;
   if (resource !== cfg.resource) throw new Error('Invalid OAuth resource');
   const scope = asString(p.scope) || scopeDefault;
-  if (scope.split(' ').some(s => !['meshy:read','meshy:generate'].includes(s))) throw new Error('Unsupported OAuth scope');
+  if (scope.split(' ').some(s => !['meshy:read','meshy:generate','offline_access'].includes(s))) throw new Error('Unsupported OAuth scope');
   return {clientId, redirectUri, state: asString(p.state), challenge: p.code_challenge, resource, scope};
 }
 
@@ -72,7 +72,7 @@ function publishMetadata(path, cfg, res) {
   if (path.includes('oauth-protected-resource')) {
     return json(res, 200, {
       resource: cfg.resource, authorization_servers: [cfg.issuer],
-      scopes_supported: ['meshy:read','meshy:generate'],
+      scopes_supported: ['meshy:read','meshy:generate','offline_access'],
       bearer_methods_supported: ['header']
     });
   }
@@ -85,7 +85,7 @@ function publishMetadata(path, cfg, res) {
     grant_types_supported: ['authorization_code','refresh_token'],
     token_endpoint_auth_methods_supported: ['none'],
     code_challenge_methods_supported: ['S256'],
-    scopes_supported: ['meshy:read','meshy:generate'],
+    scopes_supported: ['meshy:read','meshy:generate','offline_access'],
     authorization_response_iss_parameter_supported: true
   });
 }

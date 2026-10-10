@@ -21,6 +21,14 @@ test('MCP initialize and tool discovery over separate stateless HTTP requests', 
   await once(server,'listening');
   try {
     const base='http://127.0.0.1:'+server.address().port;
+    const discovery=await fetch(base+'/.well-known/oauth-authorization-server');
+    assert.equal(discovery.status,200);
+    const metadata=await discovery.json();
+    assert.ok(metadata.scopes_supported.includes('offline_access'),'Refresh scope not advertised');
+    assert.ok(metadata.grant_types_supported.includes('refresh_token'),'Refresh grant missing');
+    const resource=await fetch(base+'/.well-known/oauth-protected-resource');
+    assert.equal(resource.status,200);
+    assert.equal((await resource.json()).resource,cfg.resource);
     const request=async (body)=>{
       const r=await fetch(base+'/mcp',{method:'POST',headers:{'content-type':'application/json','accept':'application/json, text/event-stream','mcp-protocol-version':'2025-03-26',authorization:'Bearer '+token},body:JSON.stringify(body)});
       const text=await r.text();
