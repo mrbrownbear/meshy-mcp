@@ -1,4 +1,6 @@
-# Meshy MCP for Vercel
+# Meshy MCP for Vercel by Laraibrabbani.net 
+
+I saw that a lot of people were struggling with Meshy MCP so I created one for everyone. Have a great day ahead.
 
 Deploy the official Meshy MCP tool set as a stateless Streamable HTTP service with OAuth 2.0, PKCE, dynamic OAuth client registration and per-user Meshy API access.
 
@@ -30,16 +32,6 @@ Do not set a shared `MESHY_API_KEY` for public hosting. Each user enters their o
 Add a custom MCP server using your HTTPS address with `/mcp` appended. Select OAuth. ChatGPT will discover the OAuth endpoints and dynamically register a public client. During authorization, enter your own Meshy API key from https://www.meshy.ai/settings/api. Test with `meshy_check_balance` before running credit-consuming tools.
 
 The authorization server issues AES-256-GCM encrypted bearer and refresh tokens; it does not create user accounts or maintain a credential database. Access tokens expire after one hour; refresh tokens after 14 days. Changing `OAUTH_SECRET` revokes every issued token at once. Individual token revocation is not available in this stateless implementation.
-
-## Hosting considerations
-
-* Public source code is safe to share. A public hosted endpoint consumes your **Vercel compute**, even when users use their own Meshy credits. Configure Vercel Firewall rate limiting, resource budgets and usage alerts before promoting it publicly.
-* The original `meshy_download_model` tool saves files on local disk. This gateway retains its name and input schema but returns direct model or image download URLs rather than saving assets. Persistent file hosting is not included.
-* `meshy_send_to_slicer` cannot launch programs on a remote machine. The tool returns an explanatory message instead.
-* `meshy_get_task_status` limits any single waiting call to 90 seconds. For longer jobs use `wait:false` and poll later.
-* Vercel's request and response payload limit restricts large inlined files. Use hosted URLs for source images and 3D models.
-* Treat all credit-consuming operations as irreversible, and enable client approval before execution.
-* There is no built-in, distributed rate limiter or individual token revocation store. Large scale public hosting should add durable token/session storage, abuse protection and operational monitoring.
 
 ## Local checks
 
