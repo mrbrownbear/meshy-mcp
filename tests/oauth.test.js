@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {randomBytes} from 'node:crypto';
-import {config,seal,unseal,makeClientId,getClient,validateRedirect,sha256pkce,isValidVerifier,safeEqual,escapeHtml} from '../api/oauth.js';
+import {config,seal,unseal,makeClientId,getClient,validateRedirect,sha256pkce,isValidVerifier,safeEqual,escapeHtml,contentSecurityPolicy} from '../api/oauth.js';
 
 process.env.OAUTH_ISSUER='https://meshy-test.vercel.app';
 process.env.OAUTH_SECRET=randomBytes(48).toString('base64url');
@@ -43,4 +43,18 @@ test('missing configuration fails closed',()=>{
   delete process.env.OAUTH_SECRET;
   assert.throws(()=>config());
   process.env.OAUTH_SECRET=old;
+});
+
+test('OAuth form CSP allows the registered ChatGPT redirect after POST', () => {
+  const policy = contentSecurityPolicy(cfg.allowedHosts);
+  assert.match(policy, /form-action 'self' https:\/\/chatgpt\.com;/);
+  assert.match(policy, /default-src 'none'/);
+  assert.match(policy, /frame-ancestors 'none'/);
+});
+test('OAuth form CSP restricts destinations to valid configured hosts', () => {
+  const policy = contentSecurityPolicy(['chatgpt.com', 'other.example.com', 'evil.com; script-src *', 'chatgpt.com']);
+  assert.match(policy, /https:\/\/other\.example\.com/);
+  assert.equal((policy.match(/https:\/\/chatgpt\.com/g) || []).length, 1);
+  assert.ok(!policy.includes('evil.com;'));
+  assert.ok(!policy.includes('script-src'));
 });

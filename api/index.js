@@ -15,7 +15,7 @@ import { VERSION } from '@meshy-ai/meshy-mcp-server/dist/version.js';
 import { getTaskEndpoint } from '@meshy-ai/meshy-mcp-server/dist/utils/endpoints.js';
 import {
   config, seal, unseal, makeClientId, getClient, validateRedirect,
-  sha256pkce, isValidVerifier, safeEqual, escapeHtml, parseParams
+  sha256pkce, isValidVerifier, safeEqual, escapeHtml, parseParams, contentSecurityPolicy
 } from './oauth.js';
 
 const json = (res, status, data) => res.status(status).setHeader('Cache-Control','no-store').json(data);
@@ -28,7 +28,7 @@ function addHeaders(res) {
   res.setHeader('X-Content-Type-Options','nosniff');
   res.setHeader('Referrer-Policy','no-referrer');
   res.setHeader('X-Frame-Options','DENY');
-  res.setHeader('Content-Security-Policy', "default-src 'none'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'; style-src 'unsafe-inline'");
+  res.setHeader('Content-Security-Policy', contentSecurityPolicy());
 }
 
 function asString(p) { return typeof p === 'string' ? p : ''; }
@@ -186,6 +186,9 @@ export default async function handler(req, res) {
   }
 
   if (pathname === '/authorize' && req.method === 'GET') {
+    // A form POST finishes with an OAuth redirect to the registered ChatGPT host.
+    // CSP form-action must allow that exact destination as well as this server.
+    res.setHeader('Content-Security-Policy', contentSecurityPolicy(cfg.allowedHosts));
     try {
       const p = authorizeParameters(new URL(req.url,'https://localhost').searchParams && Object.fromEntries(new URL(req.url,'https://localhost').searchParams),cfg);
       const token = seal({type:'request',...p},cfg.encKey,600);

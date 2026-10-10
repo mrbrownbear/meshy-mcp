@@ -92,6 +92,22 @@ export function safeEqual(a, b) {
   const aa = Buffer.from(a), bb = Buffer.from(b);
   return aa.length === bb.length && timingSafeEqual(aa, bb);
 }
+/**
+ * Browser form-action also applies to redirect targets after an HTML form POST.
+ * Authorizing with ChatGPT redirects cross-origin to its allowlisted callback.
+ * Keep the relaxation confined to the authorization form response.
+ */
+export function contentSecurityPolicy(allowedHosts = []) {
+  const hosts = [...new Set(allowedHosts
+    .filter(host => typeof host === 'string' &&
+      /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/i.test(host) &&
+      !host.includes('..'))
+    .map(host => 'https://' + host.toLowerCase()))];
+  const actions = ["'self'", ...hosts].join(' ');
+  return "default-src 'none'; form-action " + actions +
+    "; base-uri 'none'; frame-ancestors 'none'; style-src 'unsafe-inline'";
+}
+
 export function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
