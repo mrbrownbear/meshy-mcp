@@ -1,0 +1,20 @@
+{
+  "name": "meshy-mcp-vercel",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Meshy MCP Streamable HTTP gateway with stateless OAuth and per-user API credentials",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "check": "node --check api/index.js && npm test",
+    "verify": "node -e \"import('./api/index.js').then(() => console.log('Meshy MCP modules loaded'))\"",
+    "build": "npm run verify"
+  },
+  "dependencies": {
+    "@meshy-ai/meshy-mcp-server": "0.6.1",
+    "@modelcontextprotocol/sdk": "^1.27.0"
+  }
+}

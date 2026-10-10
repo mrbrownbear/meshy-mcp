@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 300
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/mcp",
+      "destination": "/api/index?__endpoint=mcp"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/index?__endpoint=health"
+    },
+    {
+      "source": "/authorize",
+      "destination": "/api/index?__endpoint=authorize"
+    },
+    {
+      "source": "/token",
+      "destination": "/api/index?__endpoint=token"
+    },
+    {
+      "source": "/register",
+      "destination": "/api/index?__endpoint=register"
+    },
+    {
+      "source": "/.well-known/oauth-protected-resource",
+      "destination": "/api/index?__endpoint=well-known/oauth-protected-resource"
+    },
+    {
+      "source": "/.well-known/oauth-protected-resource/mcp",
+      "destination": "/api/index?__endpoint=well-known/oauth-protected-resource/mcp"
+    },
+    {
+      "source": "/.well-known/oauth-authorization-server",
+      "destination": "/api/index?__endpoint=well-known/oauth-authorization-server"
+    }
+  ]
+}
